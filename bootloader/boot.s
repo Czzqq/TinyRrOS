@@ -1,29 +1,21 @@
-# 定义常量
-.equ STACK_SIZE, 4096
+.section ".text.boot"
 
 # 定义全局符号
 .global _start
-
-# text 段
-.section .text
 _start:
-    # 重置栈指针
-    la sp, stack_top
+    # 关闭 M 模式中断
+    csrw mie, zero
 
-    /*
-     *  ...
-     */
-    la a0, os_entru
-    jr a0
+    # 设置栈， 大小为 4096
+    la sp stack_top
+    li t0, 4096
+    add sp, sp, t0
 
-loop:
-    j loop
-
+    tail sbi_start
+    
 # data 段
 .section .data
-
-.section .bss
-.align 4
-stack_bottom:
-    .skip STACK_SIZE
+.align 12
+.global stack_top
 stack_top:
+    .skip 4096
