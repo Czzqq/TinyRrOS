@@ -1,0 +1,18 @@
+[package]
+name = "os"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[build]
+target = "riscv64gc-unknown-none-elf"
+
+[target.riscv64gc-unknown-none-elf]
+rustflags = ["-Clink-arg=-Tsrc/linker.ld", "-Cforce-frame-pointers=yes", "-Clink-arg=-nostartfiles"]
+
+[profile.dev]
+rustc-link-arg = "-Tlink.ld"
+
+[profile.release]
+rustc-link-arg = "-Tlink.ld"
