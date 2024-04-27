@@ -1,7 +1,7 @@
 #ifndef _ASM_RISCV_CSR_H
 #define _ASM_RISCV_CSR_H
 
-#define INSERT_FILED(val, which, fieldval) \
+#define INSERT_FIELD(val, which, fieldval) \
     (((val) & ~(which))  |  ((fieldval) * ((which) & ~((which) - 1))))
 
 #define PRV_U   (0UL)
@@ -10,7 +10,7 @@
 
 #define MSTATUS_MPP_SHIFT    11
 #define MSTATUS_MPP          (3UL << MSTATUS_MPP_SHIFT)
-#define MSTATUS_MPPE         0x00000080UL
+#define MSTATUS_MPIE         0x00000080UL
 
 /*
  * 下面这句话会在预编译阶段变成：
@@ -22,7 +22,7 @@
     register unsigned long __v; \
     __asm__ __volatile__ ("csrr %0, " #csr \
                     : "=r" (__v) : \
-                    : "nenory");    \
+                    : "memory");    \
     __v;							\
 })
 

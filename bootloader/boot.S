@@ -7,7 +7,7 @@ _start:
     csrw mie, zero
 
     # 设置栈， 大小为 4096
-    la sp stack_top
+    la sp, stack_top
     li t0, 4096
     add sp, sp, t0
 

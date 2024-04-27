@@ -3,5 +3,5 @@ ENTRY(_start)
 
 SECTIONS
 {
-    INCLUDE "bootloader/sbi_base.ld"
+    INCLUDE "sbi_base.ld"
 }
