@@ -12,7 +12,9 @@ target = "riscv64gc-unknown-none-elf"
 rustflags = ["-Clink-arg=-Tsrc/linker.ld", "-Cforce-frame-pointers=yes", "-Clink-arg=-nostartfiles"]
 
 [profile.dev]
+panic = "abort"
 rustc-link-arg = "-Tlink.ld"
 
 [profile.release]
+panic = "abort"
 rustc-link-arg = "-Tlink.ld"
