@@ -3,7 +3,7 @@ GNU ?= riscv64-linux-gnu
 COPS += -save-temps=obj -g -O0 -Wall -nostdlib -nostdinc -Iinclude -mcmodel=medany -mabi=lp64 -march=rv64imafd -fno-PIE -fomit-frame-pointer
 COPS += -DCONFIG_BOARD_QEMU
 
-all : clean mysbi.bin 
+all : clean mysbi.bin
 
 # Check if verbosity is ON for build process
 CMD_PREFIX_DEFAULT := @
@@ -39,3 +39,4 @@ mysbi.bin: sbi_linker.ld $(SBI_OBJ_FILES)
 	$(CMD_PREFIX)$(GNU)-ld -T sbi_linker.ld -o $(SBI_BUILD_DIR)/mysbi.elf  $(SBI_OBJ_FILES) -Map mysbi.map; echo " LD $(SBI_BUILD_DIR)/mysbi.elf"
 	$(CMD_PREFIX)$(GNU)-objcopy $(SBI_BUILD_DIR)/mysbi.elf -O binary mysbi.bin; echo " OBJCOPY mysbi.bin"
 	$(CMD_PREFIX)cp $(SBI_BUILD_DIR)/mysbi.elf mysbi.elf
+	$(CMD_PREFIX)cp mysbi.elf $(O)/bootloader
