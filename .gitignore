@@ -1,5 +1,4 @@
 *.un~
 /out/
 /build/
-/build_sbi/
 /target/
