@@ -4,7 +4,18 @@ O := $(PWD)/out
 OS_TARGET := os
 BOOTLOADER_TARGET := bootloader
 
-all: bootloader os
+all: dir bootloader os
+
+# Target to create the directory if it doesn't exist
+dir:
+	@if [ ! -d "$(O)" ]; then \
+		mkdir -p "$(O)"; \
+		mkdir -p "$(O)/$(OS_TARGET)"; \
+		mkdir -p "$(O)/$(BOOTLOADER_TARGET)"; \
+		echo "Directory $(OUT) created."; \
+	else \
+		echo "Directory $(OUT) already exists."; \
+	fi
 
 bootloader:
 	@$(MAKE) O=$(O)/bootloader -C bootloader
