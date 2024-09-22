@@ -1,16 +1,15 @@
 .section ".text.boot"
 
+/* text section */
 .globl _start
 _start:
     /* close s-mode interrupt */
     csrw sie, zero
 
     /* set stack */
-    la sp, stacks_start
-    li t0, 4096
-    add sp, sp, t0
+    la sp, stacks_end_high_top
 
-    li x3, 0x100 // just for test
+    li x0, 0x100 // just for test
 
     call kernel_main
 
@@ -18,10 +17,17 @@ _loop:
     wfi
     j _loop
 
+/* data section */
 .section .data
-.align 12
-.global stacks_start
-stacks_start:
-    .skip 4096
+.globl stacks_start_low_bound
+    .space 4096 * 16
+    .globl stacks_end_high_top
+stacks_end_high_top:
+
+/* bss section */
+;.section .bss.start
+;.align 12
+;.globl bss_start
+
 
 
