@@ -7,9 +7,11 @@ _start:
     csrw sie, zero
 
     /* set stack */
-    la sp, stacks_end_high_top
+    ;la sp, stacks_top
+    la sp, stacks_bottom
 
-    li x0, 0x100 // just for test
+    // just for test
+    li x3, 0x100 
 
     call kernel_main
 
@@ -19,10 +21,11 @@ _loop:
 
 /* data section */
 .section .data
-.globl stacks_start_low_bound
+.globl stacks_top
+stacks_bottom:
     .space 4096 * 16
-    .globl stacks_end_high_top
-stacks_end_high_top:
+    .globl stacks_bottom /* high address -> stack bottom */
+stacks_top:
 
 /* bss section */
 ;.section .bss.start
