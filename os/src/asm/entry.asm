@@ -7,8 +7,7 @@ _start:
     csrw sie, zero
 
     /* set stack */
-    ;la sp, stacks_top
-    la sp, stacks_bottom
+    la sp, stacks_top
 
     // just for test
     li x3, 0x100 
@@ -21,11 +20,14 @@ _loop:
 
 /* data section */
 .section .data
-.globl stacks_top
-stacks_bottom:
+.globl stacks_lower_bound
+stacks_lower_bound:
     .space 4096 * 16
-    .globl stacks_bottom /* high address -> stack bottom */
-stacks_top:
+    .globl stacks_top
+stacks_bottom:
+stacks_top: /* high address -> stack bottom == stack top in init */
+.globl stacks_higher_bound
+stacks_higher_bound:
 
 /* bss section */
 ;.section .bss.start
