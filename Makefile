@@ -1,5 +1,7 @@
 .PHONY: bootloader os clean run
 
+GDB_TOOL := gdb
+
 O := $(PWD)/out
 OS_TARGET := os
 BOOTLOADER_TARGET := bootloader
@@ -30,10 +32,17 @@ clean:
 	@rm -rf $(O)/bootloader/*
 
 QEMU_FLAGS  += -nographic -machine virt -m 128M
-QEMU_BIOS = -bios $(O)/bootloader/$(BOOTLOADER_TARGET)  -device loader,file=$(O)/os/$(OS_TARGET),addr=0x80200000
+QEMU_BIOS = -bios $(O)/bootloader/$(BOOTLOADER_TARGET)  -device loader,file=$(O)/os/$(OS_TARGET).bin,addr=0x80200000
 
 run:
 	qemu-system-riscv64 $(QEMU_FLAGS) $(QEMU_BIOS) -kernel $(O)/os/$(OS_TARGET)
 
 debug:
 	qemu-system-riscv64 $(QEMU_FLAGS) $(QEMU_BIOS) -kernel $(O)/os/$(OS_TARGET) -gdb tcp::1235 -S
+
+gdb:
+	$(GDB_TOOL) \
+	-ex 'file ./out/os/os' \
+	-ex 'set arch riscv:rv64' \
+	-ex 'target remote localhost:1235'
+

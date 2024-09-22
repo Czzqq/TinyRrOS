@@ -15,6 +15,6 @@ clean:
 
 install: build
 	@echo "copy os to out..."
+	@rust-objcopy --strip-all $(KERNEL_ELF) -O binary $(KERNEL_ELF).bin
 	@cp $(KERNEL_ELF) $(O)/
-
-
+	@cp $(KERNEL_ELF).bin $(O)/
