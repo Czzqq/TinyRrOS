@@ -6,6 +6,7 @@ global_asm!(include_str!("asm/entry.asm"));
 
 mod io;
 mod console;
+mod lang_item;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
@@ -43,11 +44,5 @@ pub extern "C" fn kernel_main() -> ! {
 
     println!("Hello, World!");
 
-    loop{}
-}
-
-use core::panic::PanicInfo;
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop{}
+    panic!("over, test machine panic!");
 }
