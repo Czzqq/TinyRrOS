@@ -5,6 +5,7 @@ use core::arch::global_asm;
 global_asm!(include_str!("asm/entry.asm"));
 
 mod io;
+mod console;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
@@ -39,6 +40,8 @@ pub extern "C" fn kernel_main() -> ! {
 
     uart_init();
     uart_send_string("Hello, TinyRrOS!\n");
+
+    println!("Hello, World!");
 
     loop{}
 }
