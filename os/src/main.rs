@@ -33,16 +33,56 @@ fn clear_bss() {
     }
 }
 
+fn display_mem() {
+    extern "C" {
+        fn stext_boot();
+        fn etext_boot();
+        fn stext();
+        fn etext();
+        fn srodata();
+        fn erodata();
+        fn sdata();
+        fn edata();
+        fn sbss();
+        fn ebss();
+        fn skernel();
+        fn ekernel();
+    }
+    let stext_boot: usize = stext_boot as usize;
+    let etext_boot: usize = etext_boot as usize;
+    let stext: usize = stext as usize;
+    let etext: usize = etext as usize;
+    let srodata: usize = srodata as usize;
+    let erodata: usize = erodata as usize;
+    let sdata: usize = sdata as usize;
+    let edata: usize = edata as usize;
+    let sbss: usize = sbss as usize;
+    let ebss: usize = ebss as usize;
+    let skernel: usize = skernel as usize;
+    let ekernel: usize = ekernel as usize;
+
+    println!("------- image mem space info -------");
+    println!(".text.boot mem info : {:#x} - {:#x}", stext_boot, etext_boot);
+    println!(".text mem info : {:#x} - {:#x}", stext, etext);
+    println!(".rodata mem info : {:#x} - {:#x}", srodata, erodata);
+    println!(".data mem info : {:#x} - {:#x}", sdata, edata);
+    println!(".bss mem info : {:#x} - {:#x}", sbss, ebss);
+    println!(".kernel mem info : {:#x} - {:#x}", skernel, ekernel);
+    println!("------- image mem space info over -------");
+}
+
 use drivers::serial::uart16550::uart_init;
 use drivers::serial::uart16550::uart_send_string;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
+
     clear_bss();
 
     uart_init();
     uart_send_string("Hello, TinyRrOS!\n");
 
     println!("Hello, World!");
+    display_mem();
 
     panic!("over, test machine panic!");
 }
