@@ -1,5 +1,6 @@
 #include "include/csr.h"
 #include "sbi_lib.h"
+#include "sbi_trap.h"
 
 #define FW_JUMP_ADDR 0x80200000
 
@@ -60,7 +61,6 @@ int sbi_set_pmp(int reg_idx, unsigned long start, unsigned long size, unsigned l
     //printk("%s: pmpaddr: 0x%lx  pmpcfg 0x%lx, cfs_csr 0x%x addr_csr 0x%x\n",
 	//		__func__, pmpaddr, pmpcfg, pmpcfg_csr, pmpaddr_csr);
 
-	/* 写CSR寄存器 */
 	write_csr_num(pmpaddr_csr, pmpaddr);
 	write_csr_num(pmpcfg_csr, pmpcfg);
 
@@ -68,9 +68,8 @@ int sbi_set_pmp(int reg_idx, unsigned long start, unsigned long size, unsigned l
 }
 
 /*
- *  运行在 M 模式，切换到 S 模式
+ *  switch to s-mode
  */
-
 void sbi_start(void)
 {
     unsigned long val;
@@ -78,6 +77,8 @@ void sbi_start(void)
     /* Set the pmp */
     sbi_set_pmp(0, 0, -1UL, PMP_RWX);
     sbi_set_pmp(1, 0x80000000, 0x40000, PMP_RWX);
+
+	sbi_trap_init();
 
     val = read_csr(mstatus);
     val = INSERT_FIELD(val, MSTATUS_MPP, PRV_S);
