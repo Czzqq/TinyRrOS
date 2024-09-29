@@ -1,19 +1,20 @@
 .section ".text.boot"
 
-# 定义全局符号
 .global _start
 _start:
-    # 关闭 M 模式中断
+    # close all m-mode ints
     csrw mie, zero
 
-    # 设置栈， 大小为 4096
+    # set sp, size is 4096
     la sp, stack_top
     li t0, 4096
     add sp, sp, t0
 
+	csrw mscratch, sp
+
     tail sbi_start
-    
-# data 段
+
+# data section
 .section .data
 .align 12
 .global stack_top
