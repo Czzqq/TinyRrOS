@@ -74,7 +74,7 @@ fn display_mem() {
 
 use drivers::serial::uart16550::uart_init;
 use drivers::serial::uart16550::uart_send_string;
-use memory::memcpy;
+use memory::*;
 //use core::arch::asm;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
@@ -87,7 +87,7 @@ pub extern "C" fn kernel_main() -> ! {
     println!("Hello, World!");
     display_mem();
 
-    /* test in data section */
+    /* case1: test in data section */
     //let src: *mut u8 = 0x8020b200 as *mut u8;
     //let dst: *mut u8 = 0x8020b200 as *mut u8;
     //let size: usize = 0x2;
@@ -96,12 +96,15 @@ pub extern "C" fn kernel_main() -> ! {
     let src_data = [1u8, 2, 3, 4];
     let mut dst_data = [0u8; 4];
 
+    /* case2: test memcpy and memset */
     memcpy(dst_data.as_mut_ptr(), src_data.as_ptr(), src_data.len());  
-    //unsafe {
-    //    asm!("sd {0}, 0({1})",in(reg) src,in(reg) value,);
-    //    memcpy(dst, src, size);
-    //}
-    println!("{:?}", dst_data); // Should print: [1, 2, 3, 4]
+    println!("after memcpy {:?}", dst_data); // Should print: [1, 2, 3, 4]
+    memset(dst_data.as_mut_ptr(), 0xff, src_data.len());
+    for i in 0..dst_data.len() {
+        print!("{:02x} ", dst_data[i]);
+    }
+    println!("");
+
 
     panic!("over, test machine panic!");
 }
