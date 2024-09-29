@@ -43,3 +43,23 @@ pub fn memcpy(dst: *mut u8, src: *const u8, size: usize) {
 
     return
 }
+
+unsafe fn memset_asm(src: *mut u8, val: u8, size: usize) {
+    let end = src.add(size);
+    asm!(
+        "1: sd {1}, 0({0})",
+        "addi {0}, {0}, 1",
+        "blt {0}, {2}, 1b",
+        inout(reg) src => _,
+        in(reg) val,
+        in(reg) end,
+        );
+}
+
+pub fn memset(dst: *mut u8, val: u8, size: usize) {
+    unsafe {
+        memset_asm(dst, val, size);
+    }
+
+    return
+}
