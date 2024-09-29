@@ -7,6 +7,7 @@ global_asm!(include_str!("asm/entry.asm"));
 mod io;
 mod console;
 mod lang_item;
+mod memory;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
@@ -73,6 +74,8 @@ fn display_mem() {
 
 use drivers::serial::uart16550::uart_init;
 use drivers::serial::uart16550::uart_send_string;
+use memory::memcpy;
+//use core::arch::asm;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
@@ -83,6 +86,22 @@ pub extern "C" fn kernel_main() -> ! {
 
     println!("Hello, World!");
     display_mem();
+
+    /* test in data section */
+    //let src: *mut u8 = 0x8020b200 as *mut u8;
+    //let dst: *mut u8 = 0x8020b200 as *mut u8;
+    //let size: usize = 0x2;
+    //let value: usize = 0x1234;
+
+    let src_data = [1u8, 2, 3, 4];
+    let mut dst_data = [0u8; 4];
+
+    memcpy(dst_data.as_mut_ptr(), src_data.as_ptr(), src_data.len());  
+    //unsafe {
+    //    asm!("sd {0}, 0({1})",in(reg) src,in(reg) value,);
+    //    memcpy(dst, src, size);
+    //}
+    println!("{:?}", dst_data); // Should print: [1, 2, 3, 4]
 
     panic!("over, test machine panic!");
 }
