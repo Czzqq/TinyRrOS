@@ -10,7 +10,7 @@ void sbi_trap_init(void)
     /* set exception vection base address */
     write_csr(mtvec, sbi_exception_vector);
 
-    /* close all int */
+    /* disable all interrupt */
     write_csr(mie, 0);
 }
 

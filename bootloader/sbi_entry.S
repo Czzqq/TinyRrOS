@@ -6,7 +6,7 @@
 .align 3
 .global sbi_exception_vector
 sbi_exception_vector:
-    /* 
+    /*
      * catch M-mode SP from mscratch,
      * load S-mode SP to mscratch reg
      */

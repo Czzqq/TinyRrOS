@@ -29,7 +29,7 @@ _start:
     bltu t1, t2, .L1
 */
 
-    /* close s-mode interrupt */
+    /* disable s-mode interrupt */
     csrw sie, zero
 
     /* set stack */

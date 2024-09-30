@@ -2,7 +2,7 @@
 
 .global _start
 _start:
-    # close all m-mode ints
+    # disable all m-mode interrupts
     csrw mie, zero
 
     # set sp, size is 4096

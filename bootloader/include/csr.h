@@ -22,21 +22,22 @@
 #define SR_FS  0x6000UL /* Floating-point Status */
 #define SR_XS  0x00018000UL /* Extension Status */
 
-/* 中断使能 */
-#define SIE_SSIE 0x2UL /* IPI软中断使能 */
-#define SIE_STIE 0x20UL /* 时钟中断使能 */
-#define SIE_SEIE 0x200UL /* IRQ外部中断使能 */
+/* interrupts enable */
+#define SIE_SSIE 0x2UL /* IPI soft-interrupts enable */
+#define SIE_STIE 0x20UL /* clock interrupts enable */
+#define SIE_SEIE 0x200UL /* IRQ extern-interrupts enable */
 
 #define SCAUSE_INT (1UL << 63)
 #define is_interrupt_fault(reg) (reg & SCAUSE_INT)
 
-#define SCAUSE_EC (0xf) /* 目前支持15个异常*/
+#define SCAUSE_EC (0xf) /* supported 0 ~ 15 interrupts */
 
 #define SATP_MODE_39 (1UL << 63)
 
-/* Machine Memory Protection
- * 暂时支持8个pmpcfg
-*/
+/*
+ * Machine Memory Protection
+ * supported 8 pmpcfgs
+ */
 #define MAX_CSR_PMP     8
 
 #define CSR_PMPCFG0	0x3a0
@@ -69,11 +70,12 @@
 #ifndef __ASSEMBLY__
 
 /*
- * 在带参数的宏，#号作为一个预处理运算符,
- * 可以把记号转换成字符串
  *
- * 下面这句话会在预编译阶段变成：
- *  asm volatile("csrr %0, " "reg" : "=r" (__val)); __val; });
+ * In macros with parameters, the # symbol acts as a preprocessor operator,
+ * which can convert tokens into strings.
+ *
+ * The following statement will be transformed during the preprocessing stage into:
+ * asm volatile("csrr %0, " "reg" : "=r" (__val)); __val; });
  */
 #define read_csr(csr)						\
 ({								\

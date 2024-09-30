@@ -1,8 +1,5 @@
 #include "csr.h"
 
-/*
- * 暂时支持8个pmpcfpg
- */
 unsigned long read_csr_num(int csr_num)
 {
 	unsigned long ret = 0;
