@@ -52,10 +52,10 @@ pub fn save_s_context() {
             /* save s-mode scause */
             "csrr s4, scause",
             "sd, s4, 272(sp)",
-            /* save s-mode scause */
+            /* save s-mode sscratch*/
             "csrr s5, sscratch",
             "sd, s5, 32(sp)",
-            /* save s-mode scause */
+            /* save s-mode sp */
             "addi s0, {pt_size}",
             "sd, s0, 32(sp)",
 
