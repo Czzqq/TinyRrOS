@@ -1,6 +1,7 @@
 #include "include/csr.h"
 #include "sbi_lib.h"
 #include "sbi_trap.h"
+#include "include/uart.h"
 
 #define FW_JUMP_ADDR 0x80200000
 
@@ -73,6 +74,8 @@ int sbi_set_pmp(int reg_idx, unsigned long start, unsigned long size, unsigned l
 void sbi_start(void)
 {
     unsigned long val;
+
+    sbi_uart_init();
 
     /* Set the pmp */
     sbi_set_pmp(0, 0, -1UL, PMP_RWX);

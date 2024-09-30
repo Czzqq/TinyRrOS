@@ -114,8 +114,6 @@ pub extern "C" fn kernel_main() -> ! {
     /*
      * case 3: sbi call
      */
-    let c: usize = 0x1;
-    sbi_putchar(c);
     sbi_putstring("This is sbi push string\n");
 
     panic!("over, test machine panic!");

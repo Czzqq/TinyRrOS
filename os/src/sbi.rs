@@ -27,6 +27,6 @@ pub fn sbi_putchar(c: usize) {
 
 pub fn sbi_putstring(s: &str) {
     for c in s.chars() {
-        sbi_call(SBI_CONSOLE_GETCHAR, c as usize, 0, 0);
+        sbi_call(SBI_CONSOLE_PUTCHAR, c as usize, 0, 0);
     }
 }
