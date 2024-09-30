@@ -67,7 +67,7 @@ sbi_exception_vector:
 
     ld t0, PT_MEPC(sp)
     csrw mepc, t0
-    
+
 	ld x1,  PT_RA(sp)
 	ld x3,  PT_GP(sp)
 	ld x5,  PT_T0(sp)
