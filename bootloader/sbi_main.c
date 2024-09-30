@@ -23,25 +23,25 @@ int sbi_set_pmp(int reg_idx, unsigned long start, unsigned long size, unsigned l
 
 	pmpaddr = start >> PMP_SHIFT;
 
-	/* 对于RV64，对应的cfg寄存器是pmpcfg0，pmpcfg2，pmpcfg4... */
+	/* For RV64, the corresponding cfg registers are pmpcfg0, pmpcfg2, pmpcfg4... */
 	pmpcfg_csr   = (CSR_PMPCFG0 + (reg_idx >> 2)) & ~1;
 	pmpcfg_shift = (reg_idx & 7) << 3;
 
 	pmpaddr_csr = CSR_PMPADDR0 + reg_idx;
 
-	/* 配置cfg中的A字段，NA4表示只有4bytes的区域 */
+	/* Configure the A field in the cfg; NA4 indicates a region of only 4 bytes. */
 	prot &= ~PMP_A;
 	prot |= (order == PMP_SHIFT) ? PMP_A_NA4 : PMP_A_NAPOT;
 
-	/* 配置cfg中的prot */
+	/* Configure prot of cfg */
 	cfgmask = ~(0xffUL << pmpcfg_shift);
 	pmpcfg	= (read_csr_num(pmpcfg_csr) & cfgmask);
 	pmpcfg |= ((prot << pmpcfg_shift) & ~cfgmask);
 
 	/*
-	 * 配置PMP address
-	 * 当oder == 2时，A使用PMP_A_NA4, pmpaddr直接使用start>>2
-	 * 当oder > 2时，A使用PMP_A_NAPOT，需要重新配置pmpaddr
+	 * Configure PMP address
+	 * if oder == 2，A uses PMP_A_NA4, and pmpaddr directly uses start>>2
+	 * if oder > 2，A uses PMP_A_NAPOT，and needs to reconfigure pmpaddr
 	 */
 	if (order > PMP_SHIFT)
 	{
@@ -49,9 +49,9 @@ int sbi_set_pmp(int reg_idx, unsigned long start, unsigned long size, unsigned l
 			pmpaddr = -1UL;
 		} else {
 			/*
-			 * 若pmpaddr值为y...y01...1，设连续1的个数为n,
-			 * 则该PMP entry所控制的地址空间为从y...y00...0开始的2^{n+3}个字节
-			 * 参考RSIC-V手册
+			 * if the value of pmpaddr is y...y01...1，and the number of consecutive 1s is n,
+             * then the address space controlled by this PMP entry starts from y...y00...0 and spans 2^{n+3} bytes.
+             * Refer to the RISC-V manual.
 			 */
 			addrmask = (1UL << (order - PMP_SHIFT)) - 1;
 			pmpaddr	 &= ~addrmask;
@@ -88,15 +88,15 @@ void sbi_start(void)
     val = INSERT_FIELD(val, MSTATUS_MPIE, 0);
     write_csr(mstatus, val);
 
-    /* 设置 M 模式的异常程序计数器，用于 mret 跳转 */
+    /* set m-mode mepc, for mret jump */
     write_csr(mepc, FW_JUMP_ADDR);
-    /* 设置 S 模式的异常向量表入口地址 */
+    /* set s-mode exception vector address */
     write_csr(stvec, FW_JUMP_ADDR);
-    /* 关闭 S 模式中断 */
+    /* disable s-mode interrupts */
     write_csr(sie, 0);
-    /* 关闭 S 模式的页表转换 */
+    /* disable s-mode page table translation */
     write_csr(satp, 0);
 
-    /* 切换到 S 模式 */
+    /* jump to s-mode */
     asm volatile("mret");
 }

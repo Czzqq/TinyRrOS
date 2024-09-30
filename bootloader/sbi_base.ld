@@ -1,6 +1,6 @@
     /*
-     *  设置 SBI 的加载入口为 0x8000 0000
-     * . 表示 LC Location Counter 位置计数器。
+     *  set SBI application load address: 0x80000000
+     *  . LC: Location Counter
      */
     . = 0x80000000,
 
