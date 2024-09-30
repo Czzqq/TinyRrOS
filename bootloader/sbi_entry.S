@@ -51,7 +51,8 @@ sbi_exception_vector:
 	csrr t0, mstatus
 	sd t0, PT_MSTATUS(sp)
 
-    /* 1. save m-mode sp to mscratch for next time exception,
+    /*
+     * 1. save m-mode sp to mscratch for next time exception,
      * 2. save s-mode sp to sbi_trap_regs->sp
      */
     addi t0, sp, PT_SIZE
