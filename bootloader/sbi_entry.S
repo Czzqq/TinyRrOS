@@ -1,11 +1,5 @@
 #include "include/sbi_offsets.h"
-
-/*
- * M-mode exception vector should be align with 8 bytes
- */
-.align 3
-.global sbi_exception_vector
-sbi_exception_vector:
+.macro save_m_context
     /*
      * catch M-mode SP from mscratch,
      * load S-mode SP to mscratch reg
@@ -58,10 +52,9 @@ sbi_exception_vector:
     addi t0, sp, PT_SIZE
 	csrrw   t0, mscratch, t0
 	sd t0, PT_SP(sp)
+.endm
 
-	mv a0, sp /* sbi_trap_regs */
-	call sbi_trap_handler
-
+.macro recover_m_context
     /* recover exception context */
     ld t0, PT_MSTATUS(sp)
     csrw mstatus, t0
@@ -100,4 +93,18 @@ sbi_exception_vector:
 	ld x31, PT_T6(sp)
 
 	ld sp,  PT_SP(sp)
+.endm
+/*
+ * M-mode exception vector should be align with 8 bytes
+ */
+.align 3
+.global sbi_exception_vector
+sbi_exception_vector:
+    save_m_context
+
+	mv a0, sp /* sbi_trap_regs */
+	call sbi_trap_handler
+
+    recover_m_context
+
 	mret
