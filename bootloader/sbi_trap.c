@@ -1,6 +1,7 @@
 #include "include/csr.h"
 #include "include/sbi_trap_regs.h"
 #include "sbi_trap.h"
+#include "include/uart.h"
 
 extern void sbi_exception_vector(void);
 
@@ -19,7 +20,8 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 
     switch (id) {
         case SBI_CONSOLE_PUTCHAR:
-            ret = 1;
+            sbi_putchar(regs->a0);
+            ret = 0;
             break;
         default:
             break;
@@ -33,8 +35,6 @@ static int sbi_ecall_handle(unsigned int id, struct sbi_trap_regs *regs)
 
 void sbi_trap_handler(struct sbi_trap_regs *regs)
 {
-    int ret = 0;
-
     unsigned long mcause = read_csr(mcause);
     unsigned long ecall_id = regs->a7;
 
