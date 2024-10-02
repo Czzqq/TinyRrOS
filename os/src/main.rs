@@ -25,7 +25,7 @@ fn clear_bss() {
     //(sbss as usize..ebss as usize).for_each(|a|{
     //    unsafe { (a as *mut u8).write_volatile(0) }
     //});
- 
+
     /* rewrite by for loop */
     let start = sbss as usize;
     let end = ebss as usize;
@@ -78,7 +78,6 @@ use drivers::serial::uart16550::uart_init;
 use drivers::serial::uart16550::uart_send_string;
 use memory::*;
 use sbi::*;
-//use core::arch::asm;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
@@ -104,7 +103,7 @@ pub extern "C" fn kernel_main() -> ! {
     /*
      * case2: test memcpy and memset
      */
-    memcpy(dst_data.as_mut_ptr(), src_data.as_ptr(), src_data.len());  
+    memcpy(dst_data.as_mut_ptr(), src_data.as_ptr(), src_data.len());
     println!("after memcpy {:?}", dst_data); // Should print: [1, 2, 3, 4]
     memset(dst_data.as_mut_ptr(), 0xff, src_data.len());
     for i in 0..dst_data.len() {
@@ -116,6 +115,19 @@ pub extern "C" fn kernel_main() -> ! {
      * case 3: sbi call
      */
     sbi_putstring("This is sbi push string\n");
+
+    /* configure trap */
+use trap::trap_init;
+    trap_init();
+    /*
+     * case 4: exception test
+     */
+    //extern "C" {
+    //   fn trigger_fault() -> !;
+    //}
+    //unsafe {
+    //    trigger_fault();
+    //}
 
     panic!("over, test machine panic!");
 }

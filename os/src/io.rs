@@ -43,3 +43,43 @@ pub fn readb(addr: usize) -> u8 {
         value
     }
 }
+
+#[macro_export]
+macro_rules! write_csr {
+    ($csr:ident, $val:expr) => {
+        unsafe {
+            core::arch::asm!(
+                concat!("csrw ", stringify!($csr), ", {0}"),
+                in(reg) $val,
+                options(nostack, preserves_flags),
+                );
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! read_csr {
+    ($csr:ident) => {{
+        let val: usize;
+        unsafe {
+            core::arch::asm!(
+                concat!("csrr ", "{0}, ", stringify!($csr)),
+                out(reg) val,
+                options(nostack, preserves_flags),
+                );
+        }
+        val
+    }};
+}
+
+//use core::arch::asm;
+//pub fn write_csr(csr: &str, val: usize) {
+//    unsafe {
+//        asm!(
+//            "csrw {}, {}",
+//            in(reg) csr,
+//            in(reg) val,
+//            options(nostack, preserves_flags),
+//            );
+//    }
+//}
