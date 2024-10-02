@@ -46,3 +46,18 @@ void sbi_trap_handler(struct sbi_trap_regs *regs)
             break;
     }
 }
+
+void delegate_traps(void)
+{
+	unsigned long interrupts;
+	unsigned long exceptions;
+
+	interrupts = MIP_SSIP | MIP_STIP | MIP_SEIP;
+	exceptions = (1UL << CAUSE_MISALIGNED_FETCH) | (1UL << CAUSE_FETCH_PAGE_FAULT) |
+                    (1UL << CAUSE_BREAKPOINT) | (1UL << CAUSE_LOAD_PAGE_FAULT) |
+                    (1UL << CAUSE_STORE_PAGE_FAULT) | (1UL << CAUSE_USER_ECALL) |
+                    (1UL << CAUSE_LOAD_ACCESS) | (1UL << CAUSE_STORE_ACCESS);
+
+	 write_csr(mideleg, interrupts);
+	 write_csr(medeleg, exceptions);
+}

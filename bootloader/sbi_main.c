@@ -88,6 +88,8 @@ void sbi_start(void)
     val = INSERT_FIELD(val, MSTATUS_MPIE, 0);
     write_csr(mstatus, val);
 
+    delegate_traps();
+
     /* set m-mode mepc, for mret jump */
     write_csr(mepc, FW_JUMP_ADDR);
     /* set s-mode exception vector address */

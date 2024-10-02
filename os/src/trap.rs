@@ -5,6 +5,7 @@ global_asm!(include_str!("asm/entry.asm"));
 
 use core::arch::asm;
 use core::mem;
+#[no_mangle]
 pub fn save_s_context() {
     unsafe {
         asm!(
@@ -16,7 +17,7 @@ pub fn save_s_context() {
             "sd x6, 48(sp)",
             "sd x7, 56(sp)",
             "sd x8, 64(sp)",
-            "sd x9 72(sp)",
+            "sd x9, 72(sp)",
             "sd x10, 80(sp)",
             "sd x11, 88(sp)",
             "sd x12, 96(sp)",
@@ -39,31 +40,31 @@ pub fn save_s_context() {
             "sd x29, 232(sp)",
             "sd x30, 240(sp)",
             "sd x31, 248(sp)",
-
             /* save s-mode status */
             "csrr s1, sstatus",
-            "sd, s1, 256(sp)",
+            "sd s1, 256(sp)",
             /* save s-mode sepc */
             "csrr s2, sepc",
-            "sd, s2, 0(sp)",
-            /* save s-mode sbadaddr */
-            "csrr s3, sbadaddr",
-            "sd, s3, 264(sp)",
+            "sd s2, 0(sp)",
+            /* save s-mode stval/sbadaddr */
+            "csrr s3, stval",
+            "sd s3, 264(sp)",
             /* save s-mode scause */
             "csrr s4, scause",
-            "sd, s4, 272(sp)",
+            "sd s4, 272(sp)",
             /* save s-mode sscratch*/
             "csrr s5, sscratch",
-            "sd, s5, 32(sp)",
+            "sd s5, 32(sp)",
             /* save s-mode sp */
-            "addi s0, {pt_size}",
-            "sd, s0, 32(sp)",
+            "addi s0, sp, {pt_size}",
+            "sd s0, 32(sp)",
 
             pt_size = const mem::size_of::<PtRegs>(),
         );
     }
 }
 
+#[no_mangle]
 pub fn recover_s_context() {
     unsafe {
         asm!(
@@ -103,7 +104,7 @@ pub fn recover_s_context() {
             "ld x30, 240(sp)",
             "ld x31, 248(sp)",
 
-            "ld, x0, 16(sp)",
+            "ld x0, 16(sp)",
         );
     }
 }
@@ -148,6 +149,119 @@ pub struct PtRegs {
     pub scause: u64,
     /* a0 value before syscall */
     pub orig_a0: u64,
+}
+
+struct FaultInfo {
+    fn_ptr: fn(&PtRegs, &str) -> u32,
+    name: &'static str,
+}
+
+use crate::println;
+fn show_regs(regs: &PtRegs) {
+    println!("sepc: {:016x} ra: {:016x} sp : {:016x}", regs.sepc, regs.ra, regs.sp);
+    println!(" gp : {:016x} tp: {:016x} t0 : {:016x}", regs.gp, regs.tp, regs.t0);
+    println!(" t1 : {:016x} t2: {:016x} t3 : {:016x}", regs.t1, regs.t2, regs.s0);
+    println!(" s1 : {:016x} a0: {:016x} a1 : {:016x}", regs.s1, regs.a0, regs.a1);
+    println!(" a2 : {:016x} a3: {:016x} a4 : {:016x}", regs.a2, regs.a3, regs.a4);
+    println!(" a5 : {:016x} a6: {:016x} a7 : {:016x}", regs.a5, regs.a6, regs.a7);
+    println!(" s2 : {:016x} s3: {:016x} s4 : {:016x}", regs.s2, regs.s3, regs.s4);
+    println!(" s5 : {:016x} s6: {:016x} s7 : {:016x}", regs.s5, regs.s6, regs.s7);
+    println!(" s8 : {:016x} s9: {:016x} s10: {:016x}", regs.s8, regs.s9, regs.s10);
+    println!(" s11: {:016x} t3: {:016x} t4 : {:016x}", regs.s11, regs.t3, regs.t4);
+    println!(" t5 : {:016x} t6: {:016x}", regs.t5, regs.t6);
+}
+
+fn do_trap_error(regs: &PtRegs, str: &str) {
+    println!("Oops - {}", str);
+    show_regs(regs);
+    println!("sstatus: {:016x} sbadaddr: {:016x} scause: {:016x}", regs.sstatus, regs.sbadaddr, regs.scause);
+    panic!();
+}
+
+macro_rules! do_error_info {
+    ($name:ident) => {
+        fn $name(regs: &PtRegs, str: &str) -> u32 {
+            do_trap_error(regs, str);
+            0
+        }
+    }
+}
+
+do_error_info!(do_trap_unknown);
+do_error_info!(do_trap_insn_misaligned);
+do_error_info!(do_trap_insn_fault);
+do_error_info!(do_trap_insn_illegal);
+do_error_info!(do_trap_load_misaligned);
+do_error_info!(do_trap_load_fault);
+do_error_info!(do_trap_store_misaligned);
+do_error_info!(do_trap_store_fault);
+do_error_info!(do_trap_ecall_u);
+do_error_info!(do_trap_ecall_s);
+do_error_info!(do_trap_break);
+do_error_info!(do_page_fault);
+
+static FAULT_INFO: [FaultInfo; 16] = [
+    FaultInfo { fn_ptr: do_trap_insn_misaligned, name: "Instruction address misaligned" },
+    FaultInfo { fn_ptr: do_trap_insn_fault, name: "Instruction access fault" },
+    FaultInfo { fn_ptr: do_trap_insn_illegal, name: "Illegal instruction" },
+    FaultInfo { fn_ptr: do_trap_break, name: "Breakpoint" },
+    FaultInfo { fn_ptr: do_trap_load_misaligned, name: "Load address misaligned" },
+    FaultInfo { fn_ptr: do_trap_load_fault, name: "Load access fault" },
+    FaultInfo { fn_ptr: do_trap_store_misaligned, name: "Store/AMO address misaligned" },
+    FaultInfo { fn_ptr: do_trap_store_fault, name: "Store/AMO access fault" },
+    FaultInfo { fn_ptr: do_trap_ecall_u, name: "Environment call from U-mode" },
+    FaultInfo { fn_ptr: do_trap_ecall_s, name: "Environment call from S-mode" },
+    FaultInfo { fn_ptr: do_trap_unknown, name: "unknown 10" },
+    FaultInfo { fn_ptr: do_trap_unknown, name: "unknown 11" },
+    FaultInfo { fn_ptr: do_page_fault, name: "Instruction page fault" },
+    FaultInfo { fn_ptr: do_page_fault, name: "Load page fault" },
+    FaultInfo { fn_ptr: do_trap_unknown, name: "unknown 14" },
+    FaultInfo { fn_ptr: do_page_fault, name: "Store/AMO page fault" },
+];
+
+const SCAUSE_EC: usize = 0xf;
+const SCAUSE_INT: usize = 0x1 << 63;
+
+fn is_intterrupt_fault(scause: usize) -> bool {
+    (scause & SCAUSE_INT) != 0
+}
+
+#[inline(always)]
+fn ec_to_fault_info(scause: usize) -> &'static FaultInfo {
+    println!("scause : {:x}", scause);
+    let index = (scause as usize) & SCAUSE_EC;
+    &FAULT_INFO[index]
+}
+
+#[no_mangle]
+fn do_exception(regs: &mut PtRegs, scause: usize) {
+    println!("do_exception => scause: 0x{:x}", scause);
+
+    if is_intterrupt_fault(scause) {
+        // Handle interrupt fault
+    } else {
+        let inf = ec_to_fault_info(scause);
+
+        if (inf.fn_ptr)(regs, inf.name) == 0 {
+            return;
+        }
+    }
+}
+
+use crate::read_csr;
+use crate::write_csr;
+extern "C" {
+    fn do_exception_vector();
+}
+pub fn trap_init() {
+    write_csr!(sscratch, 0);
+
+	write_csr!(stvec, do_exception_vector);
+
+    let stvec_val = read_csr!(stvec);
+    println!("stevc=0x{:x}, 0x{:x}", stvec_val, do_exception_vector as usize);
+
+	write_csr!(sie, -1);
 }
 
 /* struct PtRegs members offset */
