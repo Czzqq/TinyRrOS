@@ -44,6 +44,23 @@ pub fn readb(addr: usize) -> u8 {
     }
 }
 
+pub fn readq(addr: usize) -> u64 {
+    unsafe {
+        let ptr = addr as *const u64;
+        let value = read_volatile(ptr);
+        dmb();
+        value
+    }
+}
+
+pub fn writeq(value: u64, addr: usize) {
+    unsafe {
+        let ptr = addr as *mut u64;
+        dmb();
+        write_volatile(ptr, value);
+    }
+}
+
 #[macro_export]
 macro_rules! write_csr {
     ($csr:ident, $val:expr) => {
@@ -72,14 +89,28 @@ macro_rules! read_csr {
     }};
 }
 
-//use core::arch::asm;
-//pub fn write_csr(csr: &str, val: usize) {
-//    unsafe {
-//        asm!(
-//            "csrw {}, {}",
-//            in(reg) csr,
-//            in(reg) val,
-//            options(nostack, preserves_flags),
-//            );
-//    }
-//}
+#[macro_export]
+macro_rules! csr_set {
+    ($csr:ident, $val:expr) => {{
+        unsafe {
+            core::arch::asm!(
+                concat!("csrs ", stringify!($csr), ", {0}"),
+                in(reg) $val,
+                options(nostack, preserves_flags),
+                );
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! csr_clear {
+    ($csr:ident, $val:expr) => {{
+        unsafe {
+            core::arch::asm!(
+                concat!("csrc ", stringify!($csr), ", {0}")
+                in(reg) $val,
+                options(nostack, preserves_flags),
+                );
+        }
+    }};
+}
