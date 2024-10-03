@@ -1,15 +1,20 @@
 #ifndef SBI_TRAP_H_
 #define SBI_TRAP_H_
 
+#define MCAUSE_IRQ (1UL << 63)
+
+#define SBI_SET_TIMER 0x0
 #define SBI_CONSOLE_PUTCHAR 0x1
 
 #define IRQ_S_SOFT  1
 #define IRQ_S_TIMER 5
+#define IRQ_M_TIMER 7
 #define IRQ_S_EXT   9
 
 #define MIP_SSIP (1UL << IRQ_S_SOFT)
 #define MIP_STIP  (1UL << IRQ_S_TIMER)
 #define MIP_SEIP  (1UL << IRQ_S_EXT)
+#define MIP_MTIP  (1UL << IRQ_M_TIMER)
 
 /* ===== Trap/Exception Causes ===== */
 #define CAUSE_MISALIGNED_FETCH		0x0
