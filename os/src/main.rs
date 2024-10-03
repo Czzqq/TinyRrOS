@@ -10,6 +10,7 @@ mod lang_item;
 mod memory;
 mod sbi;
 mod trap;
+mod timer;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
