@@ -4,6 +4,7 @@
 #include "sbi_timer.h"
 #include "sbi_error.h"
 #include "include/uart.h"
+#include "include/uart.h"
 
 extern void sbi_exception_vector(void);
 
@@ -17,6 +18,8 @@ void sbi_panic()
 
 static void sbi_trap_error(struct sbi_trap_regs *regs, const char *msg, int rc)
 {
+    sbi_uart_send_string((char *)msg);
+    sbi_uart_send_string("\r\n");
 	sbi_panic();
 }
 
@@ -57,27 +60,40 @@ void sbi_trap_handler(struct sbi_trap_regs *regs)
     unsigned long mcause = read_csr(mcause);
     unsigned long ecall_id = regs->a7;
     int rc = SBI_ENOTSUPP;
-    const char *msg = "trap handler failed";
+    const char *msg = "sbi: trap handler failed";
 
+    /*
+     * do interrupt
+     */
     if (mcause & MCAUSE_IRQ) {
-        mcause &= ~MCAUSE_IRQ;
+		mcause &=~ MCAUSE_IRQ;
         switch (mcause) {
             case IRQ_M_TIMER:
                 sbi_timer_process();
-            break;
+                break;
             default:
-                msg = "unhandled external interrupt";
+                msg = "sbi: unhandled external interrupt";
                 goto trap_error;
         }
+        return;
     }
 
+    /*
+     * do exception
+     */
     switch (mcause) {
         case CAUSE_SUPERVISOR_ECALL:
-            sbi_ecall_handle(ecall_id, regs);
+            rc = sbi_ecall_handle(ecall_id, regs);
+            msg = "sbi: ecall handler failed";
+            break;
+        case CAUSE_LOAD_ACCESS:
+        case CAUSE_STORE_ACCESS:
+            msg = "sbi: load store access failed";
             break;
         default:
             break;
-    }
+        }
+
 trap_error:
     if (rc) {
         sbi_trap_error(regs, msg, rc);
