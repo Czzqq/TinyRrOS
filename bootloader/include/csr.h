@@ -40,7 +40,7 @@
  */
 #define MAX_CSR_PMP     8
 
-#define CSR_PMPCFG0	0x3a0
+#define CSR_PMPCFG0	    0x3a0
 #define CSR_PMPADDR0	0x3b0
 #define CSR_PMPADDR1	0x3b1
 #define CSR_PMPADDR2	0x3b2

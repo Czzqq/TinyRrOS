@@ -107,7 +107,7 @@ macro_rules! csr_clear {
     ($csr:ident, $val:expr) => {{
         unsafe {
             core::arch::asm!(
-                concat!("csrc ", stringify!($csr), ", {0}")
+                concat!("csrc ", stringify!($csr), ", {0}"),
                 in(reg) $val,
                 options(nostack, preserves_flags),
                 );

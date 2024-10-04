@@ -8,8 +8,8 @@
 
 #define IRQ_S_SOFT  1
 #define IRQ_S_TIMER 5
-#define IRQ_M_TIMER 7
 #define IRQ_S_EXT   9
+#define IRQ_M_TIMER 7
 
 #define MIP_SSIP (1UL << IRQ_S_SOFT)
 #define MIP_STIP  (1UL << IRQ_S_TIMER)
