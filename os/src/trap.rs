@@ -127,12 +127,32 @@ fn ec_to_fault_info(scause: usize) -> &'static FaultInfo {
     &FAULT_INFO[index]
 }
 
+const INTERRUPT_CAUSE_SOFTWARE: usize = 0x1;
+const INTERRUPT_CAUSE_TIMER: usize = 0x5;
+const INTERRUPT_CAUSE_EXTERNAL: usize = 0x9;
+
+use crate::timer::handler_timer_irq;
 #[no_mangle]
 fn do_exception(regs: &mut PtRegs, scause: usize) {
-    println!("do_exception => scause: 0x{:x}", scause);
+	//println!("do_exception scause:0x{:x}, sstatus=0x{:x}", scause, regs.sstatus);
 
     if is_intterrupt_fault(scause) {
         // Handle interrupt fault
+        match scause & !SCAUSE_INT {
+            INTERRUPT_CAUSE_TIMER => {
+                handler_timer_irq();
+            },
+            INTERRUPT_CAUSE_EXTERNAL => {
+                // Handle IRQ
+            }
+            INTERRUPT_CAUSE_SOFTWARE => {
+                // Handle IPI
+            }
+            _ => {
+                println!("unexpected interrupt cause");
+                panic!();
+            }
+        }
     } else {
         let inf = ec_to_fault_info(scause);
 
