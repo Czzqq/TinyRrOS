@@ -79,6 +79,8 @@ use drivers::serial::uart16550::uart_init;
 use drivers::serial::uart16550::uart_send_string;
 use memory::*;
 use sbi::*;
+use timer::timer_init;
+use timer::arch_local_irq_enable;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
@@ -120,15 +122,22 @@ pub extern "C" fn kernel_main() -> ! {
     /* configure trap */
 use trap::trap_init;
     trap_init();
+
     /*
      * case 4: exception test
      */
+
+    // NOTE: the trigger fault will panic
     //extern "C" {
     //   fn trigger_fault() -> !;
     //}
     //unsafe {
     //    trigger_fault();
     //}
+
+    /* case 5: enable timer */
+    timer_init();
+    arch_local_irq_enable();
 
     panic!("over, test machine panic!");
 }
