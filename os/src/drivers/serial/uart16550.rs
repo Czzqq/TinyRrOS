@@ -22,19 +22,31 @@ const UART_LSR_BI: usize = 0x10;
 const UART_LSR_FE: usize = 0x08;
 const UART_LSR_PE: usize = 0x04;
 const UART_LSR_OE: usize = 0x02;
-const UART_LSR_DE: usize = 0x01;
+const UART_LSR_DR: usize = 0x01;
 
 static UART16550_CLOCK: u32 = 1843200;
 const UART_DEFAULT_BAUD: u32 = 115200;
 
+const UART0_IRQ: i32 = 10;
+
 use crate::io;
+use crate::plic::plic_enable_irq;
+use crate::println;
 
 fn uart_send(c: char) {
-    while (io::readb(UART_LSR) & UART_LSR_EMPTY as u8) == 0 {
+    while (io::readb(UART_LSR) as usize & UART_LSR_EMPTY) == 0 {
         // busy wait until the uart is ready to send
     }
 
     io::writeb(c as u8, UART_DAT);
+}
+
+fn uart_get() -> Option<u8> {
+    if (io::readb(UART_LSR) as usize & UART_LSR_DR) != 0 {
+        Some(io::readb(UART_DAT))
+    } else {
+        None
+    }
 }
 
 pub fn uart_send_string(str: &str) {
@@ -47,7 +59,7 @@ pub fn uart_init() {
     let divisor: u32 = UART16550_CLOCK / (16 * UART_DEFAULT_BAUD);
 
     /* disabled interrupt */
-    io::writeb(0, UART_IER);
+    io::writeb(0x0, UART_IER);
 
     /* enable DLAB (set baud rate divisor) */
     io::writeb(0x80, UART_LCR);
