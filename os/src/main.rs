@@ -66,12 +66,18 @@ fn display_mem() {
     let ekernel: usize = ekernel as usize;
 
     println!("------- image mem space info -------");
-    println!(".text.boot mem info : {:#x} - {:#x}", stext_boot, etext_boot);
-    println!(".text mem info : {:#x} - {:#x}", stext, etext);
-    println!(".rodata mem info : {:#x} - {:#x}", srodata, erodata);
-    println!(".data mem info : {:#x} - {:#x}", sdata, edata);
-    println!(".bss mem info : {:#x} - {:#x}", sbss, ebss);
-    println!(".kernel mem info : {:#x} - {:#x}", skernel, ekernel);
+    println!(".text.boot mem info : {:#x} - {:#x} ({:?} B)", stext_boot, etext_boot,
+                                                        etext_boot - stext_boot);
+    println!("     .text mem info : {:#x} - {:#x} ({:?} B)", stext, etext,
+                                                        etext - stext);
+    println!("   .rodata mem info : {:#x} - {:#x} ({:?} B)", srodata, erodata,
+                                                        erodata - srodata);
+    println!("     .data mem info : {:#x} - {:#x} ({:?} B)", sdata, edata,
+                                                        edata - sdata);
+    println!("      .bss mem info : {:#x} - {:#x} ({:?} B)", sbss, ebss,
+                                                        ebss - sbss);
+    println!("   .kernel mem info : {:#x} - {:#x} ({:?} B)", skernel, ekernel,
+                                                        ekernel - skernel);
     println!("------- image mem space info over -------");
 }
 
