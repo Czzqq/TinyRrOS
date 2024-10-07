@@ -71,4 +71,23 @@ pub fn uart_init() {
 
     /* enable FIFO, empty FIFO, set 14 bytes threshold */
     io::writeb(0xc7, UART_FCR);
+
+    /* enable interrupt when buffer full */
+    io::writeb(0x1, UART_IER);
+}
+
+pub fn enable_uart_plic() {
+    let cpu = 0;
+
+    uart_init();
+
+    plic_enable_irq(cpu, UART0_IRQ, true);
+}
+
+pub fn handle_uart_irq() {
+    if let Some(c) = uart_get() {
+        if c == b'\r' {
+            println!("handle_uart_irq occurred");
+        }
+    }
 }
