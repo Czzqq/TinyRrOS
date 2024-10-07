@@ -132,6 +132,7 @@ const INTERRUPT_CAUSE_TIMER: usize = 0x5;
 const INTERRUPT_CAUSE_EXTERNAL: usize = 0x9;
 
 use crate::timer::handler_timer_irq;
+use crate::plic::handler_plic_irq;
 #[no_mangle]
 fn do_exception(regs: &mut PtRegs, scause: usize) {
 	//println!("do_exception scause:0x{:x}, sstatus=0x{:x}", scause, regs.sstatus);
@@ -143,6 +144,7 @@ fn do_exception(regs: &mut PtRegs, scause: usize) {
                 handler_timer_irq();
             },
             INTERRUPT_CAUSE_EXTERNAL => {
+                handler_plic_irq(regs);
                 // Handle IRQ
             }
             INTERRUPT_CAUSE_SOFTWARE => {

@@ -11,6 +11,7 @@ mod memory;
 mod sbi;
 mod trap;
 mod timer;
+mod plic;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
@@ -81,19 +82,27 @@ fn display_mem() {
     println!("------- image mem space info over -------");
 }
 
-use drivers::serial::uart16550::uart_init;
+use drivers::serial::uart16550::enable_uart_plic;
 use drivers::serial::uart16550::uart_send_string;
 use memory::*;
 use sbi::*;
 use timer::timer_init;
 use timer::arch_local_irq_enable;
+use plic::plic_init;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
     clear_bss();
 
-    uart_init();
-    uart_send_string("Hello, TinyRrOS!\n");
+    /* configure trap */
+use trap::trap_init;
+    trap_init();
+
+    plic_init();
+    enable_uart_plic();
+    arch_local_irq_enable();
+
+    uart_send_string("Hello, TinyRrOS!\r\n");
 
     println!("Hello, World!");
     display_mem();
@@ -125,14 +134,9 @@ pub extern "C" fn kernel_main() -> ! {
      */
     sbi_putstring("This is sbi push string\n");
 
-    /* configure trap */
-use trap::trap_init;
-    trap_init();
-
     /*
      * case 4: exception test
      */
-
     // NOTE: the trigger fault will panic
     //extern "C" {
     //   fn trigger_fault() -> !;
@@ -142,8 +146,10 @@ use trap::trap_init;
     //}
 
     /* case 5: enable timer */
-    timer_init();
+    //timer_init();
+	println!("sstatus:0x{:x}\n", read_csr!(sstatus));
     arch_local_irq_enable();
+	println!("sstatus:0x{:x}, sie:0x{:x}\n", read_csr!(sstatus), read_csr!(sie));
 
     panic!("over, test machine panic!");
 }
