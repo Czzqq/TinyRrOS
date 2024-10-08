@@ -123,6 +123,7 @@ pub fn handler_plic_irq(regs: &PtRegs) {
             break;
         }
 
+        /* UART0_IRQ is 10 in qumu virt */
         if hwirq == 10 {
             handle_uart_irq();
         }
