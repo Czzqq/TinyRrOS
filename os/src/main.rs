@@ -12,6 +12,8 @@ mod sbi;
 mod trap;
 mod timer;
 mod plic;
+#[cfg(feature = "with-symbol-table")]
+mod backtrace;
 mod drivers {
     pub mod serial {
         pub mod uart16550;

@@ -16,7 +16,7 @@ build:
 	@riscv64-linux-gnu-gcc -E $(OS_PATH)/src/symbols.c -o $(O)/symbols.i
 	@riscv64-linux-gnu-gcc -S $(O)/symbols.i -o $(O)/symbols.s
 	@riscv64-linux-gnu-as $(O)/symbols.s -o $(O)/symbols.o
-	@cargo build
+	@cargo build --features with-symbol-table
 
 clean:
 	@rm $(SYMBOLS_FILE)
