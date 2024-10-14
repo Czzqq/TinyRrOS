@@ -4,7 +4,7 @@ TARGET := riscv64gc-unknown-none-elf
 MODE := debug
 KERNEL_ELF := target/$(TARGET)/$(MODE)/os
 OS_PATH := $(PWD)/os
-SYMBOLS_FILE := $(OS_PATH)/src/symbols.c
+SYMBOLS_FILE := $(OS_PATH)/src/symbols.rs
 
 all: build install
 
@@ -12,11 +12,10 @@ build:
 	@echo "Build os..."
 	@cargo build
 	@rust-nm $(KERNEL_ELF) > $(O)/symbols.txt
-	@python3 $(OS_PATH)/scripts/symbol2c.py $(O)/symbols.txt $(SYMBOLS_FILE)
-	@riscv64-linux-gnu-gcc -E $(OS_PATH)/src/symbols.c -o $(O)/symbols.i
-	@riscv64-linux-gnu-gcc -S $(O)/symbols.i -o $(O)/symbols.s
-	@riscv64-linux-gnu-as $(O)/symbols.s -o $(O)/symbols.o
+	@cp $(O)/symbols.txt $(O)/first_symbols.txt
+	@python3 $(OS_PATH)/scripts/symbol2rs.py $(O)/symbols.txt $(SYMBOLS_FILE)
 	@cargo build --features with-symbol-table
+	@rust-nm $(KERNEL_ELF) > $(O)/symbols.txt
 
 clean:
 	@rm $(SYMBOLS_FILE)
