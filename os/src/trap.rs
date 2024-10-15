@@ -7,7 +7,7 @@ use crate::plic::handler_plic_irq;
 use crate::read_csr;
 use crate::write_csr;
 #[cfg(feature = "with-symbol-table")]
-use crate::backtrace::print_symbols;
+use crate::backtrace::backtrace;
 
 global_asm!(include_str!("asm/entry.asm"));
 
@@ -75,7 +75,7 @@ fn show_regs(regs: &PtRegs) {
 fn do_trap_error(regs: &PtRegs, str: &str) {
     println!("Oops - {}", str);
 #[cfg(feature = "with-symbol-table")]
-    print_symbols();
+    backtrace(regs);
     show_regs(regs);
     println!("sstatus: {:016x} sbadaddr: {:016x} scause: {:016x}", regs.sstatus, regs.sbadaddr, regs.scause);
     panic!();
