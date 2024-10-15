@@ -16,6 +16,10 @@ build:
 	@python3 $(OS_PATH)/scripts/symbol2rs.py $(O)/symbols.txt $(SYMBOLS_FILE)
 	@cargo build --features with-symbol-table
 	@rust-nm $(KERNEL_ELF) > $(O)/symbols.txt
+	@cp $(O)/symbols.txt $(O)/second_symbols.txt
+	@python3 $(OS_PATH)/scripts/symbol2rs.py $(O)/symbols.txt $(SYMBOLS_FILE)
+	@cargo build --features with-symbol-table
+	@rust-nm $(KERNEL_ELF) > $(O)/final_symbols.txt
 
 clean:
 	@rm $(SYMBOLS_FILE)
