@@ -28,9 +28,9 @@ for line in lines:
 with open(output_file_path, 'w') as f:
     f.write('#[derive(Debug)]\n')
     f.write('pub struct Symbol {\n')
-    f.write('    address: usize,\n')
-    f.write('    name: &\'static str,\n')
-    f.write('    size: usize,\n')
+    f.write('    pub address: usize,\n')
+    f.write('    pub name: &\'static str,\n')
+    f.write('    pub size: usize,\n')
     f.write('}\n\n')
     f.write(f'pub const SYMBOL_TABLE: [Symbol; {len(symbols)}] = [\n')
 
