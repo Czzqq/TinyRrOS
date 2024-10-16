@@ -1,11 +1,9 @@
 #![allow(dead_code)]
 
 use core::arch::global_asm;
-use crate::println;
 use crate::timer::handler_timer_irq;
 use crate::plic::handler_plic_irq;
-use crate::read_csr;
-use crate::write_csr;
+use crate::{read_csr, write_csr, println};
 #[cfg(feature = "with-symbol-table")]
 use crate::backtrace::backtrace;
 

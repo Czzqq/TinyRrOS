@@ -1,9 +1,6 @@
 #![no_main]
 #![no_std]
 
-use core::arch::global_asm;
-global_asm!(include_str!("asm/boot.asm"));
-
 mod io;
 mod console;
 mod lang_item;
@@ -21,6 +18,16 @@ mod drivers {
         pub mod uart16550;
     }
 }
+
+use core::arch::global_asm;
+use drivers::serial::uart16550::{enable_uart_plic, uart_send_string};
+use memory::*;
+use sbi::*;
+use timer::timer_init;
+use timer::arch_local_irq_enable;
+use plic::plic_init;
+use trap::trap_init;
+global_asm!(include_str!("asm/boot.asm"));
 
 fn clear_bss() {
     extern "C" {
@@ -86,20 +93,12 @@ fn display_mem() {
     println!("------- image mem space info over -------");
 }
 
-use drivers::serial::uart16550::enable_uart_plic;
-use drivers::serial::uart16550::uart_send_string;
-use memory::*;
-use sbi::*;
-use timer::timer_init;
-use timer::arch_local_irq_enable;
-use plic::plic_init;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
     clear_bss();
 
     /* configure trap */
-use trap::trap_init;
     trap_init();
 
     plic_init();

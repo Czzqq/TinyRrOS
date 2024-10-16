@@ -1,6 +1,4 @@
-use crate::println;
-use crate::symbols::SYMBOL_TABLE;
-use crate::trap::PtRegs;
+use crate::{println, symbols::SYMBOL_TABLE, trap::PtRegs};
 use core::arch::asm;
 
 #[repr(C)]
