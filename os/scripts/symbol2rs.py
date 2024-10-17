@@ -34,6 +34,8 @@ symbols.sort(key=lambda x: parse_address(x[0]))
 with open(output_file_path, 'w') as f:
     f.write('#![allow(dead_code)]\n')
     f.write('#![allow(unused_variables)]\n')
+    f.write('\n')
+    f.write('#[repr(C)]\n')
     f.write('pub struct Symbol {\n')
     f.write('    pub address: usize,\n')
     f.write('    pub name: &\'static str,\n')
