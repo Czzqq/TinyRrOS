@@ -37,7 +37,7 @@
 	/*save sepc*/
 	csrr s2, sepc
 	sd s2, 0(sp)
-	
+
 	/*save sbadaddr*/
 	csrr s3, stval
 	sd s3, 264(sp)
@@ -99,9 +99,25 @@
 .align 2
 .global trigger_fault
 trigger_fault:
-    li a0, 0x70000
-    ld a0, (a0)
+    # set a vaild sp
+    addi sp, sp, -16
+    sd ra, 8(sp)
+    sd s0, 0(sp)
+    addi s0, sp, 16
+
+    # try to access a error address
+    li a0, 0x0
+    ld a1, (a0) # trap!!!
+
+    # it's not normal to process it
+    li a0, -1
+    sd a0, 0(sp)
+
+    ld ra, 8(sp)
+    ld s0, 0(sp)
+    addi sp, sp, 16
     ret
+
 /*
  * do_exception_vector must align 4 bytes
  */
