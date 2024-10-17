@@ -26,7 +26,8 @@ for line in lines:
             symbols.append((address, name))
 
 with open(output_file_path, 'w') as f:
-    f.write('#[derive(Debug)]\n')
+    f.write('#![allow(dead_code)]\n')
+    f.write('#![allow(unused_variables)]\n')
     f.write('pub struct Symbol {\n')
     f.write('    pub address: usize,\n')
     f.write('    pub name: &\'static str,\n')
