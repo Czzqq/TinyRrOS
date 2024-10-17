@@ -140,19 +140,25 @@ pub extern "C" fn kernel_main() -> ! {
     /*
      * case 4: exception test
      */
-    // NOTE: the trigger fault will panic
-    //extern "C" {
-    //   fn trigger_fault() -> !;
-    //}
-    //unsafe {
-    //    trigger_fault();
-    //}
+    test_exception_handling();
 
     /* case 5: enable timer */
     //timer_init();
-	println!("sstatus:0x{:x}\n", read_csr!(sstatus));
-    arch_local_irq_enable();
-	println!("sstatus:0x{:x}, sie:0x{:x}\n", read_csr!(sstatus), read_csr!(sie));
+	//println!("sstatus:0x{:x}\n", read_csr!(sstatus));
+	//   arch_local_irq_enable();
+	//println!("sstatus:0x{:x}, sie:0x{:x}\n", read_csr!(sstatus), read_csr!(sie));
+	//
+	//   panic!("over, test machine panic!");
+}
+// NOTE: the trigger fault will panic
+extern "C" {
+    fn trigger_fault() -> !;
+}
 
-    panic!("over, test machine panic!");
+#[no_mangle]
+fn test_exception_handling() -> ! {
+    unsafe {
+        trigger_fault();
+        //println!("Error: Returned from trigger_fault!");
+    }
 }
