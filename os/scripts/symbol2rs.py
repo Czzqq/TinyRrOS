@@ -1,6 +1,9 @@
 #!/bin/python3
 import sys
 
+def parse_address(address_str):
+    return int(address_str, 16)
+
 if len(sys.argv) < 3:
     print("Usage: python3 script.py <path_to_symbols_file> <output_file_path>")
     sys.exit(1)
@@ -24,6 +27,9 @@ for line in lines:
         name = parts[2]
         if not name.startswith(".L__unnamed_"):
             symbols.append((address, name))
+
+# Sort symbols by address
+symbols.sort(key=lambda x: parse_address(x[0]))
 
 with open(output_file_path, 'w') as f:
     f.write('#![allow(dead_code)]\n')
