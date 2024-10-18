@@ -24,9 +24,7 @@ pub const SYMBOL_TABLE_SIZE: usize = SYMBOL_TABLE.len();
 fn lookup_symbol(address: usize) {
     let mut low: usize = 0;
     let mut high: usize = SYMBOL_TABLE_SIZE;
-    let mut mid: usize = 0;
-
-    //println!("lookup_symbol, pc: {:016x}", address);
+    let mut mid: usize;
 
     while high - low > 1 {
         mid = (high + low) / 2;
@@ -36,11 +34,11 @@ fn lookup_symbol(address: usize) {
             high = mid;
         }
     }
+    let symbol = &SYMBOL_TABLE[low];
+    let (target, name) = (symbol.address.clone(), symbol.name);
+    let offset: usize = address - target;
 
-    println!("found symbol index: {:?}", low);
-    println!("address: {:016x}, name: {:?}", SYMBOL_TABLE[low].address, SYMBOL_TABLE[low].name);
-    //println!("offset: {:016x}", offset);
-    //println!("{:?}+{:016x}/{:016x}", SYMBOL_TABLE[low].name, SYMBOL_TABLE[low].address, address - SYMBOL_TABLE[low].address);
+    println!("<{}>+{:#016x}/{:#04x}", name, target, offset);
 }
 
 fn print_symbols(addr: usize) {
@@ -63,15 +61,15 @@ fn is_kernel_text(addr: u64) -> bool {
     }
 }
 
-#[inline(always)]  
-unsafe fn __builtin_frame_address(level: u32) -> *const u8 {  
-    let addr: *const u8;  
-    if level == 0 {  
-        asm!("mv {}, s0", out(reg) addr);  
-    } else {  
-        addr = core::ptr::null();  
-    }  
-    addr  
+#[inline(always)]
+unsafe fn __builtin_frame_address(level: u32) -> *const u8 {
+    let addr: *const u8;
+    if level == 0 {
+        asm!("mv {}, s0", out(reg) addr);
+    } else {
+        addr = core::ptr::null();
+    }
+    addr
 }
 
 type StackFrameCallback = fn(u64) -> bool;
@@ -113,8 +111,9 @@ where
             break;
         }
 
-        let frame = (fp - 16) as *const StackFrame;
+        // let frame = (fp - 16) as *const StackFrame;
         unsafe {
+            let frame = (fp as *const StackFrame).sub(1);
             if (frame as u64) > ekernel || (frame as u64) < skernel {
                 break;
             }
@@ -122,6 +121,7 @@ where
             sp = fp;
             fp = (*frame).fp;
             pc = (*frame).ra.wrapping_sub(4);
+
         }
     }
 }

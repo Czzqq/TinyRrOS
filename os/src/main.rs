@@ -140,7 +140,7 @@ pub extern "C" fn kernel_main() -> ! {
     /*
      * case 4: exception test
      */
-    test_exception_handling();
+    test_exception();
 
     /* case 5: enable timer */
     //timer_init();
@@ -153,6 +153,11 @@ pub extern "C" fn kernel_main() -> ! {
 // NOTE: the trigger fault will panic
 extern "C" {
     fn trigger_fault() -> !;
+}
+
+#[no_mangle]
+fn test_exception() -> ! {
+    test_exception_handling();
 }
 
 #[no_mangle]
