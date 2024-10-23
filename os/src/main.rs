@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+#![allow(unused)]
 #![no_main]
 #![no_std]
 
@@ -9,6 +11,7 @@ mod sbi;
 mod trap;
 mod timer;
 mod plic;
+mod mm;
 #[cfg(feature = "with-symbol-table")]
 mod backtrace;
 #[cfg(feature = "with-symbol-table")]
