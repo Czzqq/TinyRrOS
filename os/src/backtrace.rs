@@ -111,7 +111,6 @@ where
             break;
         }
 
-        // let frame = (fp - 16) as *const StackFrame;
         unsafe {
             let frame = (fp as *const StackFrame).sub(1);
             if (frame as u64) > ekernel || (frame as u64) < skernel {
