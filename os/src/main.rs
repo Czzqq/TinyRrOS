@@ -1,9 +1,6 @@
 #![no_main]
 #![no_std]
 
-use core::arch::global_asm;
-global_asm!(include_str!("asm/boot.asm"));
-
 mod io;
 mod console;
 mod lang_item;
@@ -12,11 +9,25 @@ mod sbi;
 mod trap;
 mod timer;
 mod plic;
+#[cfg(feature = "with-symbol-table")]
+mod backtrace;
+#[cfg(feature = "with-symbol-table")]
+mod symbols;
 mod drivers {
     pub mod serial {
         pub mod uart16550;
     }
 }
+
+use core::arch::global_asm;
+use drivers::serial::uart16550::{enable_uart_plic, uart_send_string};
+use memory::*;
+use sbi::*;
+use timer::timer_init;
+use timer::arch_local_irq_enable;
+use plic::plic_init;
+use trap::trap_init;
+global_asm!(include_str!("asm/boot.asm"));
 
 fn clear_bss() {
     extern "C" {
@@ -82,20 +93,12 @@ fn display_mem() {
     println!("------- image mem space info over -------");
 }
 
-use drivers::serial::uart16550::enable_uart_plic;
-use drivers::serial::uart16550::uart_send_string;
-use memory::*;
-use sbi::*;
-use timer::timer_init;
-use timer::arch_local_irq_enable;
-use plic::plic_init;
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
 
     clear_bss();
 
     /* configure trap */
-use trap::trap_init;
     trap_init();
 
     plic_init();
@@ -137,16 +140,10 @@ use trap::trap_init;
     /*
      * case 4: exception test
      */
-    // NOTE: the trigger fault will panic
-    //extern "C" {
-    //   fn trigger_fault() -> !;
-    //}
-    //unsafe {
-    //    trigger_fault();
-    //}
+    //test_exception();
 
     /* case 5: enable timer */
-    //timer_init();
+    timer_init();
 	println!("sstatus:0x{:x}\n", read_csr!(sstatus));
     arch_local_irq_enable();
 	println!("sstatus:0x{:x}, sie:0x{:x}\n", read_csr!(sstatus), read_csr!(sie));

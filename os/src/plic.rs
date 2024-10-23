@@ -8,11 +8,9 @@ const PLIC_BASE: usize =  0xc000000;
 /* irq extern interrupt enable */
 const SIE_SEIE: usize = 0x200;
 
-use crate::csr_set;
-use crate::csr_clear;
+use crate::{csr_set, csr_clear, println};
 use crate::trap::PtRegs;
 use crate::io::*;
-use crate::println;
 use crate::drivers::serial::uart16550::handle_uart_irq;
 
 /* configure interrupts priority */
@@ -123,6 +121,7 @@ pub fn handler_plic_irq(regs: &PtRegs) {
             break;
         }
 
+        /* UART0_IRQ is 10 in qumu virt */
         if hwirq == 10 {
             handle_uart_irq();
         }

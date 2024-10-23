@@ -3,16 +3,22 @@ name = "os"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+with-symbol-table = []
+
 [dependencies]
 
 [build]
 target = "riscv64gc-unknown-none-elf"
+rustflags = ["-C", "debuginfo=2"]
 
 [target.riscv64gc-unknown-none-elf]
 rustflags = ["-Clink-arg=-Tlinker.ld", "-Cforce-frame-pointers=yes", "-Clink-arg=-nostartfiles"]
 
 [profile.dev]
+debug = true
 panic = "abort"
 
 [profile.release]
+debug = true
 panic = "abort"

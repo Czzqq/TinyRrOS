@@ -1,4 +1,10 @@
 #![allow(dead_code)]
+use core::ptr::{read_volatile, write_volatile};
+use crate::io::*;
+use crate::sbi::sbi_set_timer;
+use crate::{csr_set, csr_clear, println};
+
+
 const SIE_STIE: usize = 0x20;
 const CLINT_TIMEBASE_FREQ: usize = 10000000;
 const HZ: usize = 1000;
@@ -6,7 +12,6 @@ const HZ: usize = 1000;
 const VIRT_CLINT_ADDR: usize = 0x2000000;
 const VIRT_CLINT_TIMER_CMP: usize = VIRT_CLINT_ADDR + 0x4000;
 const VIRT_CLINT_TIMER_VAL:usize = VIRT_CLINT_ADDR + 0xbff8;
-use core::ptr::{read_volatile, write_volatile};
 
 // Align the struct to a cache line (typically 64 bytes)
 #[repr(C, align(64))]
@@ -52,15 +57,12 @@ unsafe fn get_jiffies() -> u64 {
 /*
  * NOTE: the func is use the custom sbi that configure pmp 0x0 - ~0x0
  */
-use crate::io::*;
 #[inline(always)]
 fn get_cycles() -> usize {
     let value = readq(VIRT_CLINT_TIMER_VAL);
     value as usize
 }
 
-use crate::csr_set;
-use crate::sbi::sbi_set_timer;
 fn reset_timer() {
     let val = get_cycles() + CLINT_TIMEBASE_FREQ / HZ;
     sbi_set_timer(val);
@@ -71,8 +73,6 @@ pub fn timer_init() {
     reset_timer();
 }
 
-use crate::csr_clear;
-use crate::println;
 pub fn handler_timer_irq() {
     csr_clear!(sie, SIE_STIE);
     reset_timer();

@@ -1,6 +1,12 @@
 #![allow(dead_code)]
 
 use core::arch::global_asm;
+use crate::timer::handler_timer_irq;
+use crate::plic::handler_plic_irq;
+use crate::{read_csr, write_csr, println};
+#[cfg(feature = "with-symbol-table")]
+use crate::backtrace::backtrace;
+
 global_asm!(include_str!("asm/entry.asm"));
 
 #[repr(C)]
@@ -50,7 +56,6 @@ struct FaultInfo {
     name: &'static str,
 }
 
-use crate::println;
 fn show_regs(regs: &PtRegs) {
     println!("sepc: {:016x} ra: {:016x} sp : {:016x}", regs.sepc, regs.ra, regs.sp);
     println!(" gp : {:016x} tp: {:016x} t0 : {:016x}", regs.gp, regs.tp, regs.t0);
@@ -67,6 +72,8 @@ fn show_regs(regs: &PtRegs) {
 
 fn do_trap_error(regs: &PtRegs, str: &str) {
     println!("Oops - {}", str);
+#[cfg(feature = "with-symbol-table")]
+    backtrace(regs);
     show_regs(regs);
     println!("sstatus: {:016x} sbadaddr: {:016x} scause: {:016x}", regs.sstatus, regs.sbadaddr, regs.scause);
     panic!();
@@ -131,8 +138,6 @@ const INTERRUPT_CAUSE_SOFTWARE: usize = 0x1;
 const INTERRUPT_CAUSE_TIMER: usize = 0x5;
 const INTERRUPT_CAUSE_EXTERNAL: usize = 0x9;
 
-use crate::timer::handler_timer_irq;
-use crate::plic::handler_plic_irq;
 #[no_mangle]
 fn do_exception(regs: &mut PtRegs, scause: usize) {
 	//println!("do_exception scause:0x{:x}, sstatus=0x{:x}", scause, regs.sstatus);
@@ -164,8 +169,6 @@ fn do_exception(regs: &mut PtRegs, scause: usize) {
     }
 }
 
-use crate::read_csr;
-use crate::write_csr;
 extern "C" {
     fn do_exception_vector();
 }
